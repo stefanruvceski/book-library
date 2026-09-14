@@ -84,19 +84,10 @@ export function formatReadDate(iso: string | null): string | null {
 
 /** Perceived luminance (0–1) — used to pick readable foil against a spine color. */
 export function luminance(hex: string): number {
-  const normalized = hex.replace("#", "");
-  const full =
-    normalized.length === 3
-      ? normalized
-          .split("")
-          .map((char) => char + char)
-          .join("")
-      : normalized.slice(0, 6);
+  const rgb = channels(hex);
+  if (!rgb) return 0;
 
-  const value = Number.parseInt(full, 16);
-  if (Number.isNaN(value)) return 0;
-
-  const [r, g, b] = [(value >> 16) & 255, (value >> 8) & 255, value & 255].map((channel) => {
+  const [r, g, b] = rgb.map((channel) => {
     const srgb = channel / 255;
     return srgb <= 0.03928 ? srgb / 12.92 : ((srgb + 0.055) / 1.055) ** 2.4;
   });
@@ -109,10 +100,62 @@ export function inkOn(hex: string): string {
   return luminance(hex) > 0.45 ? "#171310" : "#f8f5ef";
 }
 
-export function withAlpha(hex: string, alpha: number): string {
+/** Parses a 3- or 6-digit hex into RGB channels; null when it isn't one. */
+function channels(hex: string): [number, number, number] | null {
   const normalized = hex.replace("#", "").slice(0, 6);
-  const value = Number.parseInt(normalized.length === 3 ? normalized.repeat(2).slice(0, 6) : normalized, 16);
-  if (Number.isNaN(value)) return hex;
-  const [r, g, b] = [(value >> 16) & 255, (value >> 8) & 255, value & 255];
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  const full = normalized.length === 3 ? normalized.repeat(2).slice(0, 6) : normalized;
+  const value = Number.parseInt(full, 16);
+  if (Number.isNaN(value) || full.length !== 6) return null;
+  return [(value >> 16) & 255, (value >> 8) & 255, value & 255];
+}
+
+function toHex([r, g, b]: [number, number, number]): string {
+  return `#${[r, g, b].map((channel) => Math.round(channel).toString(16).padStart(2, "0")).join("")}`;
+}
+
+/** Moves a colour toward black (negative) or white (positive) by `amount` (0–1). */
+export function shade(hex: string, amount: number): string {
+  const rgb = channels(hex);
+  if (!rgb) return hex;
+  const target = amount < 0 ? 0 : 255;
+  const strength = Math.abs(amount);
+  return toHex(rgb.map((channel) => channel + (target - channel) * strength) as [number, number, number]);
+}
+
+export function withAlpha(hex: string, alpha: number): string {
+  const rgb = channels(hex);
+  if (!rgb) return hex;
+  return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
+}
+
+/** Name particles that belong with the surname they precede. */
+const PARTICLES = new Set([
+  "le", "la", "de", "del", "della", "di", "da", "dos", "das",
+  "van", "von", "der", "den", "ten", "ter", "du", "st",
+]);
+
+/**
+ * What a binder stamps in the author compartment: the surname alone, because
+ * that is all a spine has room for. Joint authors are left as written.
+ */
+export function surname(author: string): string {
+  if (author.includes("&") || author.includes(",")) return author;
+
+  const parts = author.trim().split(/\s+/).filter(Boolean);
+  if (parts.length < 2) return author;
+
+  const last = parts[parts.length - 1];
+  const previous = parts[parts.length - 2]?.replace(/\.$/, "").toLowerCase();
+
+  return previous && PARTICLES.has(previous) ? `${parts[parts.length - 2]} ${last}` : last;
+}
+
+/**
+ * How many raised bands (hubs) run across a spine. A real binder fits them to
+ * the height of the book, so taller volumes get more compartments.
+ */
+export function bandCount(height: number): number {
+  if (height < 250) return 3;
+  if (height < 290) return 4;
+  return 5;
 }

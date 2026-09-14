@@ -1,23 +1,19 @@
 @import "tailwindcss";
 
 @theme {
-  /* The room */
-  --color-room: #06060a;
-  --color-room-deep: #030305;
-  --color-wood: #1b1410;
-  --color-wood-lit: #2b201a;
-  --color-brass: #d9a441;
-  --color-dust: #cbbfae;
+  /* The room — warm black, lamp-lit, never blue */
+  --color-room: #0f0a07;
+  --color-room-deep: #070403;
+  --color-brass: #c9a227;
+  --color-dust: #d8c9ae;
 
   /* The open page */
-  --color-parchment: #efe6d4;
-  --color-parchment-shade: #e2d6bf;
-  --color-ink: #2a2119;
+  --color-parchment: #ece0c6;
+  --color-parchment-shade: #ded0b2;
+  --color-ink: #2b2118;
 
   --font-display: var(--font-display), "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-
-  --shadow-shelf: 0 24px 40px -18px rgb(0 0 0 / 0.9);
 }
 
 :root {
@@ -31,13 +27,12 @@ body {
 
 body {
   background-color: var(--color-room-deep);
-  color: #e7e2d9;
+  color: #e2d8c6;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-/* Framer Motion drives every transform on 3D elements; these only set the stage. */
 @utility preserve-3d {
   transform-style: preserve-3d;
 }
@@ -51,24 +46,75 @@ body {
   text-orientation: mixed;
 }
 
-/* Warm paper grain for the open book, drawn rather than downloaded. */
+/* ---------------------------------------------------------------------------
+ * Timber
+ *
+ * Every wooden surface is drawn rather than downloaded: a stack of repeating
+ * gradients for the grain over a base gradient for the form. Grain runs along
+ * the length of the piece, so boards and posts need separate rules.
+ * ------------------------------------------------------------------------- */
+
+/* Shelf board seen edge-on — grain runs left to right, lamp catches the nose. */
+.wood-board {
+  background-color: #4a3222;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgb(0 0 0 / 0.24) 0 1px,
+      transparent 1px 2px,
+      rgb(255 255 255 / 0.05) 2px 3px,
+      transparent 3px 6px
+    ),
+    linear-gradient(to bottom, #8a5f39 0%, #6a4529 22%, #472d1b 55%, #2a1a10 78%, #150d08 100%);
+}
+
+/* Upright — grain runs top to bottom. */
+.wood-post {
+  background-color: #3b2718;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      rgb(0 0 0 / 0.3) 0 1px,
+      transparent 1px 3px,
+      rgb(255 255 255 / 0.045) 3px 4px,
+      transparent 4px 9px
+    ),
+    linear-gradient(90deg, #241608 0%, #543522 45%, #2e1c11 100%);
+}
+
+/* Back of the case — planked, and much darker than anything standing on it. */
+.wood-back {
+  background-color: #150e09;
+  background-image:
+    repeating-linear-gradient(90deg, rgb(0 0 0 / 0.55) 0 2px, transparent 2px 84px),
+    repeating-linear-gradient(
+      90deg,
+      rgb(0 0 0 / 0.22) 0 1px,
+      transparent 1px 4px,
+      rgb(255 255 255 / 0.018) 4px 5px,
+      transparent 5px 11px
+    ),
+    linear-gradient(180deg, #241710 0%, #150d09 45%, #0b0705 100%);
+}
+
+/* Aged paper for the open book, drawn the same way. */
 .paper-grain {
   background-image:
-    radial-gradient(circle at 18% 12%, rgb(255 255 255 / 0.55), transparent 55%),
-    radial-gradient(circle at 82% 88%, rgb(120 96 62 / 0.13), transparent 60%),
+    radial-gradient(circle at 18% 12%, rgb(255 252 240 / 0.6), transparent 55%),
+    radial-gradient(circle at 82% 88%, rgb(120 92 52 / 0.16), transparent 60%),
+    radial-gradient(circle at 92% 8%, rgb(126 96 54 / 0.12), transparent 42%),
     repeating-linear-gradient(
       98deg,
-      rgb(140 118 82 / 0.045) 0px,
-      rgb(140 118 82 / 0.045) 1px,
+      rgb(140 114 74 / 0.05) 0px,
+      rgb(140 114 74 / 0.05) 1px,
       transparent 1px,
       transparent 4px
     );
 }
 
-/* Scrollbar inside the notes page — thin, in ink, never a bright OS bar. */
 .page-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgb(42 33 25 / 0.28) transparent;
+  scrollbar-color: rgb(43 33 24 / 0.28) transparent;
 }
 
 .page-scroll::-webkit-scrollbar {
@@ -76,7 +122,7 @@ body {
 }
 
 .page-scroll::-webkit-scrollbar-thumb {
-  background-color: rgb(42 33 25 / 0.25);
+  background-color: rgb(43 33 24 / 0.25);
   border-radius: 999px;
 }
 

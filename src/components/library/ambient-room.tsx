@@ -30,38 +30,50 @@ export function AmbientRoom() {
 
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      {/* Lamp above the shelves */}
+      {/* Panelled wall behind the case */}
       <div
-        className="absolute -top-40 left-1/2 h-[70vh] w-[120vw] -translate-x-1/2 rounded-[50%] opacity-70 blur-3xl"
+        className="absolute inset-0"
         style={{
-          background:
-            "radial-gradient(closest-side, rgba(217,164,65,0.22), rgba(217,164,65,0.06) 55%, transparent 75%)",
+          backgroundColor: "#0a0705",
+          backgroundImage:
+            "repeating-linear-gradient(90deg, rgba(0,0,0,0.5) 0 2px, transparent 2px 120px), linear-gradient(180deg, #0e0a07 0%, #070504 55%, #050302 100%)",
         }}
       />
 
-      {/* Cold rim light from the left, so the spines have two-sided shading */}
+      {/* Lamp above the shelves, with the slow unsteadiness of a filament */}
+      <motion.div
+        className="absolute -top-44 left-1/2 h-[72vh] w-[120vw] -translate-x-1/2 rounded-[50%] blur-3xl"
+        style={{
+          background:
+            "radial-gradient(closest-side, rgba(214,152,58,0.3), rgba(190,128,44,0.08) 55%, transparent 76%)",
+        }}
+        animate={reduceMotion ? undefined : { opacity: [0.82, 1, 0.9, 0.97, 0.85] }}
+        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* A second, warmer source low and to the right — a reading lamp */}
       <div
-        className="absolute top-1/4 -left-32 h-[60vh] w-[60vh] rounded-full opacity-40 blur-3xl"
-        style={{ background: "radial-gradient(closest-side, rgba(96,140,190,0.18), transparent 70%)" }}
+        className="absolute right-[-10vw] bottom-[8vh] h-[52vh] w-[52vh] rounded-full opacity-60 blur-3xl"
+        style={{ background: "radial-gradient(closest-side, rgba(196,124,44,0.16), transparent 70%)" }}
       />
 
       {/* Floor bounce */}
       <div
-        className="absolute inset-x-0 bottom-0 h-[35vh]"
-        style={{ background: "linear-gradient(to top, rgba(217,164,65,0.07), transparent)" }}
+        className="absolute inset-x-0 bottom-0 h-[32vh]"
+        style={{ background: "linear-gradient(to top, rgba(201,162,39,0.07), transparent)" }}
       />
 
       {/* Vignette */}
       <div
         className="absolute inset-0"
-        style={{ background: "radial-gradient(120% 80% at 50% 30%, transparent 35%, rgba(3,3,5,0.85) 100%)" }}
+        style={{ background: "radial-gradient(115% 78% at 50% 28%, transparent 30%, rgba(5,3,2,0.92) 100%)" }}
       />
 
       {!reduceMotion &&
         MOTES.map((mote, index) => (
           <motion.span
             key={index}
-            className="absolute rounded-full bg-brass/50 blur-[1px]"
+            className="absolute rounded-full bg-brass/45 blur-[1px]"
             style={{
               left: `${mote.left}%`,
               top: `${mote.top}%`,

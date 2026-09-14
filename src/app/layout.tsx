@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Spectral } from "next/font/google";
+import { EB_Garamond, Inter } from "next/font/google";
 
 import "./globals.css";
 
@@ -9,7 +9,9 @@ const sans = Inter({
   display: "swap",
 });
 
-const display = Spectral({
+// EB Garamond is the period-correct face here: it is a Garamond revival, which
+// is what most of the books on this shelf would actually have been set in.
+const display = EB_Garamond({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   style: ["normal", "italic"],

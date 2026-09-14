@@ -13,6 +13,9 @@ import { OpenBook } from "./open-book";
 import { Shelf } from "./shelf";
 import { SORTS, Toolbar, type SortKey } from "./toolbar";
 
+/** Empty shelves below the collection are what make the case read as furniture. */
+const MIN_SHELVES = 2;
+
 interface LibrarySceneProps {
   books: Book[];
   /** Where the data came from — surfaced as a small badge in the footer. */
@@ -89,10 +92,16 @@ export function LibraryScene({ books, source }: LibrarySceneProps) {
     return [...filtered].sort(sorters[sort]);
   }, [books, genre, query, searchIndex, sort]);
 
-  const shelves = useMemo(
-    () => packShelves(visibleBooks, (book) => spineMetrics(book).width, shelfWidth - 16),
-    [visibleBooks, shelfWidth],
-  );
+  /** Usable width inside the case, after the stiles and the shelf's own padding. */
+  const shelfInner = shelfWidth - 20;
+
+  const shelves = useMemo(() => {
+    const packed = packShelves(visibleBooks, (book) => spineMetrics(book).width, shelfInner);
+    // A case has as many shelves as it has, whether or not you have books for
+    // them. Padding to a minimum keeps it furniture rather than a single plank.
+    while (packed.length < MIN_SHELVES) packed.push([]);
+    return packed;
+  }, [visibleBooks, shelfInner]);
 
   const selectedIndex = visibleBooks.findIndex((book) => book.id === selectedId);
   const selected = selectedIndex >= 0 ? visibleBooks[selectedIndex] : null;
@@ -182,19 +191,20 @@ export function LibraryScene({ books, source }: LibrarySceneProps) {
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="py-24 text-center font-display text-lg text-dust/35 italic"
+                className="py-28 text-center font-display text-lg text-dust/35 italic"
               >
                 Nothing on the shelf matches that. Try a different search.
               </motion.p>
             ) : (
-              <ul className="flex flex-col gap-1" style={{ transformStyle: "preserve-3d" }}>
+              <ul className="flex flex-col" style={{ transformStyle: "preserve-3d" }}>
                 {shelves.map((shelfBooks, index) => (
                   <Shelf
-                    key={shelfBooks[0]?.id ?? index}
+                    key={`shelf-${index}`}
                     index={index}
                     books={shelfBooks}
                     selectedId={selectedId}
                     onSelect={openBook}
+                    available={shelfInner}
                   />
                 ))}
               </ul>

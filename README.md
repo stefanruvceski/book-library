@@ -9,16 +9,21 @@ Built with **Next.js 16 (App Router)**, **Tailwind CSS v4**, **Framer Motion** a
 
 ## What's in here
 
-- **A real shelf.** Spine thickness and height come from each book's page count, and the shelf
-  packs itself against the measured container width — resize the window and the rows reflow.
+- **A real bookcase.** Planked back, stiles, cornice and plinth, all drawn in CSS — no textures to
+  download. Spine thickness and height come from each book's page count, the shelf packs itself
+  against the measured container width, and a row with room to spare lets its last volume lean.
+- **Books bound, not printed.** Each spine is tooled the way a binder would: raised bands across
+  the back, gold fillets either side of each one, the title stamped on a panel of darker morocco,
+  the author's surname below it, and a small gold tool in the spare compartment.
 - **One continuous motion.** The spine and the open cover share a Framer Motion `layoutId`, so the
   book is never re-created: it flies from the shelf to the centre of the screen, opens, and flies
   home again when you close it.
 - **A 3D cover that opens.** Wide screens swing the cover left off its spine to reveal the title
   page and the notes; narrow screens flip it up over the top edge instead. The back of the cover
   is an *Ex Libris* bookplate.
-- **Covers without cover art.** If Storyblok has no `cover_image`, a typographic clothbound cover
-  is drawn from the book's own spine and accent colours — no placeholder images, no broken art.
+- **Covers without cover art.** If Storyblok has no `cover_image`, the front board is tooled from
+  the book's own spine and accent colours — double fillet, corner fleurons, stamped title panel —
+  so there are no placeholder images and no broken art.
 - **Search across notes,** not just titles: the rich-text body is flattened into the search index.
 - **Deep links.** Opening a book pushes `?book=<slug>`; the link opens straight into that book, and
   the back button closes it.
