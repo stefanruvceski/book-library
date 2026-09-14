@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@theme {
+  /* The room */
+  --color-room: #06060a;
+  --color-room-deep: #030305;
+  --color-wood: #1b1410;
+  --color-wood-lit: #2b201a;
+  --color-brass: #d9a441;
+  --color-dust: #cbbfae;
+
+  /* The open page */
+  --color-parchment: #efe6d4;
+  --color-parchment-shade: #e2d6bf;
+  --color-ink: #2a2119;
+
+  --font-display: var(--font-display), "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --shadow-shelf: 0 24px 40px -18px rgb(0 0 0 / 0.9);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-room-deep);
+  color: #e7e2d9;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Framer Motion drives every transform on 3D elements; these only set the stage. */
+@utility preserve-3d {
+  transform-style: preserve-3d;
+}
+
+@utility backface-hidden {
+  backface-visibility: hidden;
+}
+
+.vertical-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+/* Warm paper grain for the open book, drawn rather than downloaded. */
+.paper-grain {
+  background-image:
+    radial-gradient(circle at 18% 12%, rgb(255 255 255 / 0.55), transparent 55%),
+    radial-gradient(circle at 82% 88%, rgb(120 96 62 / 0.13), transparent 60%),
+    repeating-linear-gradient(
+      98deg,
+      rgb(140 118 82 / 0.045) 0px,
+      rgb(140 118 82 / 0.045) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+}
+
+/* Scrollbar inside the notes page — thin, in ink, never a bright OS bar. */
+.page-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(42 33 25 / 0.28) transparent;
+}
+
+.page-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.page-scroll::-webkit-scrollbar-thumb {
+  background-color: rgb(42 33 25 / 0.25);
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
