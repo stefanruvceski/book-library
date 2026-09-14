@@ -54,47 +54,34 @@ body {
  * the length of the piece, so boards and posts need separate rules.
  * ------------------------------------------------------------------------- */
 
-/* Shelf board seen edge-on — grain runs left to right, lamp catches the nose. */
+/* Shelf board seen edge-on — the lamp catches the nose, the rest falls away. */
 .wood-board {
   background-color: #4a3222;
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      rgb(0 0 0 / 0.24) 0 1px,
-      transparent 1px 2px,
-      rgb(255 255 255 / 0.05) 2px 3px,
-      transparent 3px 6px
-    ),
-    linear-gradient(to bottom, #8a5f39 0%, #6a4529 22%, #472d1b 55%, #2a1a10 78%, #150d08 100%);
+  background-image: linear-gradient(to bottom, #8f6339 0%, #6b4629 20%, #462d1b 54%, #291910 78%, #140c07 100%);
 }
 
-/* Upright — grain runs top to bottom. */
+/* Upright. */
 .wood-post {
   background-color: #3b2718;
-  background-image:
-    repeating-linear-gradient(
-      90deg,
-      rgb(0 0 0 / 0.3) 0 1px,
-      transparent 1px 3px,
-      rgb(255 255 255 / 0.045) 3px 4px,
-      transparent 4px 9px
-    ),
-    linear-gradient(90deg, #241608 0%, #543522 45%, #2e1c11 100%);
+  background-image: linear-gradient(90deg, #211408 0%, #4f3220 48%, #2b1a10 100%);
 }
 
-/* Back of the case — planked, and much darker than anything standing on it. */
+/* Back of the case — much darker than anything standing in front of it. */
 .wood-back {
   background-color: #150e09;
-  background-image:
-    repeating-linear-gradient(90deg, rgb(0 0 0 / 0.55) 0 2px, transparent 2px 84px),
-    repeating-linear-gradient(
-      90deg,
-      rgb(0 0 0 / 0.22) 0 1px,
-      transparent 1px 4px,
-      rgb(255 255 255 / 0.018) 4px 5px,
-      transparent 5px 11px
-    ),
-    linear-gradient(180deg, #241710 0%, #150d09 45%, #0b0705 100%);
+  background-image: linear-gradient(180deg, #251811 0%, #150d09 45%, #0a0605 100%);
+}
+
+/*
+ * Grain overlay. Applied as a separate layer so the noise texture multiplies
+ * over the form gradient above rather than fighting it in one background
+ * shorthand.
+ */
+.grain-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
 }
 
 /* Aged paper for the open book, drawn the same way. */

@@ -2,6 +2,8 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 
+import { ROOM_DUST, WOOD_UPRIGHT } from "@/lib/textures";
+
 /**
  * The room the shelves live in: a pool of lamplight, a heavy vignette and a
  * few motes of dust drifting through the beam.
@@ -33,11 +35,11 @@ export function AmbientRoom() {
       {/* Panelled wall behind the case */}
       <div
         className="absolute inset-0"
-        style={{
-          backgroundColor: "#0a0705",
-          backgroundImage:
-            "repeating-linear-gradient(90deg, rgba(0,0,0,0.5) 0 2px, transparent 2px 120px), linear-gradient(180deg, #0e0a07 0%, #070504 55%, #050302 100%)",
-        }}
+        style={{ background: "linear-gradient(180deg, #0e0a07 0%, #070504 55%, #050302 100%)" }}
+      />
+      <div
+        className="absolute inset-0 opacity-40 mix-blend-overlay"
+        style={{ backgroundImage: WOOD_UPRIGHT, backgroundSize: "260px 900px" }}
       />
 
       {/* Lamp above the shelves, with the slow unsteadiness of a filament */}
@@ -67,6 +69,12 @@ export function AmbientRoom() {
       <div
         className="absolute inset-0"
         style={{ background: "radial-gradient(115% 78% at 50% 28%, transparent 30%, rgba(5,3,2,0.92) 100%)" }}
+      />
+
+      {/* Everything in the room is very slightly dusty */}
+      <div
+        className="absolute inset-0 opacity-[0.16] mix-blend-overlay"
+        style={{ backgroundImage: ROOM_DUST, backgroundSize: "200px 200px" }}
       />
 
       {!reduceMotion &&

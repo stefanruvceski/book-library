@@ -12,9 +12,14 @@ Built with **Next.js 16 (App Router)**, **Tailwind CSS v4**, **Framer Motion** a
 - **A real bookcase.** Planked back, stiles, cornice and plinth, all drawn in CSS — no textures to
   download. Spine thickness and height come from each book's page count, the shelf packs itself
   against the measured container width, and a row with room to spare lets its last volume lean.
-- **Books bound, not printed.** Each spine is tooled the way a binder would: raised bands across
-  the back, gold fillets either side of each one, the title stamped on a panel of darker morocco,
-  the author's surname below it, and a small gold tool in the spare compartment.
+- **No two books built the same.** Each one gets one of four bindings — plain cloth, a pasted
+  spine label, flat gilt rules, or fully tooled raised bands — chosen from its slug, along with how
+  rubbed its gold is, how far back it sits and how much it leans. Plain cloth is the commonest,
+  because that is what a real shelf mostly is.
+- **Materials, not patterns.** Leather grain, book cloth, laid paper and wood grain are all SVG
+  `feTurbulence` noise. A repeating gradient always reads as a tileset — the eye finds the period
+  instantly — whereas turbulence has none, so the grain comes out irregular the way the real
+  materials are. Nothing is downloaded.
 - **One continuous motion.** The spine and the open cover share a Framer Motion `layoutId`, so the
   book is never re-created: it flies from the shelf to the centre of the screen, opens, and flies
   home again when you close it.

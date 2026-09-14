@@ -33,14 +33,27 @@ function hashUnit(seed: string): number {
   return ((hash >>> 0) % 1000) / 1000;
 }
 
+/**
+ * A stable pseudo-random value in 0–1 for a given seed and salt.
+ *
+ * Every irregularity on the shelf — which binding a book has, how rubbed its
+ * gold is, how far back it sits — comes from here, so it is decided once by the
+ * book's slug and never changes between renders or between server and client.
+ */
+export function noiseFrom(seed: string, salt: string): number {
+  return hashUnit(`${seed}::${salt}`);
+}
+
 export function spineMetrics(book: Book): SpineMetrics {
   const pages = clamp(book.pages ?? 300, MIN_PAGES, MAX_PAGES);
   const thickness = (pages - MIN_PAGES) / (MAX_PAGES - MIN_PAGES);
   const jitter = hashUnit(book.slug);
 
+  // Real shelves vary far more than page counts alone would suggest — trim
+  // sizes differ, so the jitter carries as much weight as the extent does.
   return {
-    width: Math.round(42 + thickness * 48),
-    height: Math.round(238 + jitter * 52 + thickness * 26),
+    width: Math.round(36 + thickness * 54 + hashUnit(`${book.slug}:w`) * 10),
+    height: Math.round(214 + jitter * 74 + thickness * 30),
   };
 }
 
@@ -93,6 +106,19 @@ export function luminance(hex: string): number {
   });
 
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/**
+ * Tooling colour that actually reads against the binding it is struck on.
+ *
+ * Dark blind-tooling on tan calf is period-correct but disappears if the two
+ * are close in value, so a low-contrast pair is pushed further apart rather
+ * than swapped for something that would look wrong.
+ */
+export function legibleStamp(spine: string, accent: string): string {
+  const delta = luminance(accent) - luminance(spine);
+  if (Math.abs(delta) > 0.16) return accent;
+  return shade(accent, delta >= 0 ? 0.42 : -0.48);
 }
 
 /** Ink color that stays legible on top of an arbitrary spine color. */

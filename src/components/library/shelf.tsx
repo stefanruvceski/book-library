@@ -1,6 +1,7 @@
 "use client";
 
 import type { Book } from "@/lib/types";
+import { WOOD_ALONG } from "@/lib/textures";
 import { spineMetrics } from "@/lib/utils";
 
 import { BookSpine } from "./book-spine";
@@ -28,7 +29,7 @@ export function Shelf({ books, selectedId, onSelect, index, available }: ShelfPr
 
   return (
     <li className="relative">
-      <div className="relative flex items-end gap-[4px] pl-3" style={{ transformStyle: "preserve-3d" }}>
+      <div className="relative flex items-end gap-[1px] pl-3" style={{ transformStyle: "preserve-3d" }}>
         {books.map((book, i) => (
           <BookSpine
             key={book.id}
@@ -45,8 +46,8 @@ export function Shelf({ books, selectedId, onSelect, index, available }: ShelfPr
         {/* Shadow the case throws down onto whatever stands in it */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-10"
-          style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.45), transparent)" }}
+          className="pointer-events-none absolute inset-x-0 top-0 h-16"
+          style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.62), transparent)" }}
         />
         {/* Contact shadow where the books meet the board */}
         <div
@@ -59,6 +60,10 @@ export function Shelf({ books, selectedId, onSelect, index, available }: ShelfPr
       {/* The board */}
       <div aria-hidden className="relative">
         <div className="wood-board relative h-[15px] shadow-[0_24px_38px_-16px_rgba(0,0,0,0.95)]">
+          <div
+            className="grain-layer"
+            style={{ backgroundImage: WOOD_ALONG, backgroundSize: "700px 90px", opacity: 0.42 }}
+          />
           {/* Bullnose highlight along the front edge */}
           <div
             className="absolute inset-x-0 top-0 h-px"
