@@ -7,6 +7,17 @@ Built with **Next.js 16 (App Router)**, **Tailwind CSS v4**, **Framer Motion** a
 
 ---
 
+## Two ways to render the shelf
+
+**A photograph.** Drop a library photo into `public/scene/`, measure the shelves
+with the built-in `/calibrate` tool, and the case and the room become that
+photograph — the interactive spines are placed onto bays measured on the image,
+the page sits inside a defocused copy of it, and a colour grade puts the books in
+the photo's light. See [`public/scene/README.md`](public/scene/README.md).
+
+**Or nothing at all.** With no photograph the app draws its own bookcase, which
+is what everything below describes. It is the default, and it needs no assets.
+
 ## What's in here
 
 - **A real bookcase.** Planked back, stiles, cornice and plinth, all drawn in CSS — no textures to
@@ -65,6 +76,7 @@ seconds. `POST /api/revalidate?secret=…` purges that tag on publish.
 src/
 ├── app/
 │   ├── api/revalidate/route.ts   Storyblok publish webhook
+│   ├── calibrate/                workshop tool for measuring shelves on a photo
 │   ├── layout.tsx                fonts, metadata
 │   └── page.tsx                  server component — fetches, renders the scene
 ├── components/
@@ -75,12 +87,15 @@ src/
 │   │   ├── bookcase.tsx          back panel, uprights, plinth
 │   │   ├── library-scene.tsx     state, filtering, shelf packing, deep links
 │   │   ├── open-book.tsx         the 3D reader
+│   │   ├── photo-bookcase.tsx    the case when it is a photograph
 │   │   ├── rating-stars.tsx
 │   │   ├── shelf.tsx             one row of books on a lit board
 │   │   └── toolbar.tsx           search, genre pills, sort
 │   └── rich-text.tsx             Storyblok rich text → React, no dependency
 └── lib/
     ├── mock-books.ts             the demo shelf
+    ├── scene.ts                  reads and validates public/scene/scene.json
+    ├── textures.ts               SVG turbulence for leather, cloth, paper, wood
     ├── storyblok.ts              CDN v2 client + normalisation
     ├── types.ts
     ├── use-media-query.ts

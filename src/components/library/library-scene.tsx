@@ -4,11 +4,12 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { LayoutGroup, motion } from "framer-motion";
 import { Library } from "lucide-react";
 
-import type { Book, RichTextNode } from "@/lib/types";
+import type { Book, RichTextNode, Scene } from "@/lib/types";
 import { packShelves, spineMetrics } from "@/lib/utils";
 
 import { AmbientRoom } from "./ambient-room";
 import { Bookcase } from "./bookcase";
+import { PhotoBookcase } from "./photo-bookcase";
 import { OpenBook } from "./open-book";
 import { Shelf } from "./shelf";
 import { SORTS, Toolbar, type SortKey } from "./toolbar";
@@ -20,6 +21,31 @@ interface LibrarySceneProps {
   books: Book[];
   /** Where the data came from — surfaced as a small badge in the footer. */
   source: "storyblok" | "demo";
+  /**
+   * A photographic backplate, when the user has supplied one. With a scene the
+   * case and the room are the photograph; without one they are drawn in CSS.
+   */
+  scene: Scene | null;
+}
+
+/**
+ * The room behind a photographic scene: the same image, thrown far out of
+ * focus and dimmed, so the page sits inside the photograph rather than on a
+ * flat colour that does not match it.
+ */
+function PhotoRoom({ image }: { image: string }) {
+  return (
+    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+      <div
+        className="absolute -inset-24 bg-cover bg-center"
+        style={{ backgroundImage: `url(${image})`, filter: "blur(48px) brightness(0.3) saturate(0.85)" }}
+      />
+      <div
+        className="absolute inset-0"
+        style={{ background: "radial-gradient(115% 78% at 50% 28%, transparent 25%, rgba(4,3,2,0.9) 100%)" }}
+      />
+    </div>
+  );
 }
 
 /** Flattens rich text so notes are searchable alongside title and author. */
@@ -33,7 +59,7 @@ function plainText(value: Book["summary"]): string {
   return walk(value.content);
 }
 
-export function LibraryScene({ books, source }: LibrarySceneProps) {
+export function LibraryScene({ books, source, scene }: LibrarySceneProps) {
   const [query, setQuery] = useState("");
   const [genre, setGenre] = useState<string | null>(null);
   const [sort, setSort] = useState<SortKey>("recent");
@@ -155,7 +181,7 @@ export function LibraryScene({ books, source }: LibrarySceneProps) {
 
   return (
     <LayoutGroup>
-      <AmbientRoom />
+      {scene ? <PhotoRoom image={scene.image} /> : <AmbientRoom />}
 
       <main className="relative mx-auto flex min-h-screen w-full max-w-5xl flex-col px-5 pt-16 pb-24 sm:px-8">
         <header className="mb-12">
@@ -184,7 +210,25 @@ export function LibraryScene({ books, source }: LibrarySceneProps) {
           />
         </div>
 
-        {/* The bookcase */}
+        {/* The bookcase — a photograph if one was supplied, otherwise drawn */}
+        {scene ? (
+          visibleBooks.length === 0 ? (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="py-28 text-center font-display text-lg text-dust/35 italic"
+            >
+              Nothing on the shelf matches that. Try a different search.
+            </motion.p>
+          ) : (
+            <PhotoBookcase
+              scene={scene}
+              books={visibleBooks}
+              selectedId={selectedId}
+              onSelect={openBook}
+            />
+          )
+        ) : (
         <Bookcase>
           <div ref={shelfRef} className="relative" style={{ perspective: 1800 }}>
             {visibleBooks.length === 0 ? (
@@ -211,6 +255,7 @@ export function LibraryScene({ books, source }: LibrarySceneProps) {
             )}
           </div>
         </Bookcase>
+        )}
 
         <footer className="mt-20 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-dust/8 pt-6 font-sans text-[0.6rem] tracking-[0.22em] text-dust/25 uppercase">
           <span>

@@ -1,0 +1,11 @@
+{
+  "image": "/scene/library.jpg",
+  "width": 2000,
+  "height": 1333,
+  "credit": "Photo by <name> on <source>",
+  "grade": { "tint": "#c98a3a", "strength": 0.18, "shade": 0.12 },
+  "bays": [
+    { "left": 0.075, "right": 0.925, "baseline": 0.415, "clearance": 0.3, "dim": true },
+    { "left": 0.075, "right": 0.925, "baseline": 0.78, "clearance": 0.3, "dim": true }
+  ]
+}

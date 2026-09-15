@@ -25,10 +25,12 @@ interface BookSpineProps {
   isSelected: boolean;
   /** Degrees of lean, for the last book on a shelf that isn't full. */
   lean?: number;
+  /** Shrinks the whole binding to fit a bay measured on a photograph. */
+  scale?: number;
 }
 
-export function BookSpine({ book, onSelect, isSelected, lean = 0 }: BookSpineProps) {
-  const { width, height } = spineMetrics(book);
+export function BookSpine({ book, onSelect, isSelected, lean = 0, scale = 1 }: BookSpineProps) {
+  const { width, height } = spineMetrics(book, scale);
   const reduceMotion = useReducedMotion();
   const rand = (salt: string) => noiseFrom(book.slug, salt);
 
@@ -139,7 +141,15 @@ export function BookSpine({ book, onSelect, isSelected, lean = 0 }: BookSpinePro
           }}
         />
 
-        <SpineFace binding={binding} book={book} gold={gold} stamped={stamped} width={width} rand={rand} />
+        <SpineFace
+          binding={binding}
+          book={book}
+          gold={gold}
+          stamped={stamped}
+          width={width}
+          scale={scale}
+          rand={rand}
+        />
 
         {/* The block of pages on the fore-edge, dirtier at the bottom */}
         <span
@@ -188,19 +198,20 @@ interface FaceProps {
   gold: string;
   stamped: string;
   width: number;
+  scale: number;
   rand: (salt: string) => number;
 }
 
-function SpineFace({ binding, book, gold, stamped, width, rand }: FaceProps) {
-  const narrow = width < 52;
-  const title = <Title book={book} colour={stamped} narrow={narrow} />;
+function SpineFace({ binding, book, gold, stamped, width, scale, rand }: FaceProps) {
+  const narrow = width < 52 * scale;
+  const title = <Title book={book} colour={stamped} narrow={narrow} scale={scale} />;
 
 
   if (binding === "plain") {
     return (
       <span className="absolute inset-x-0 top-6 bottom-6 flex flex-col items-stretch px-[3px]">
         <span className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">{title}</span>
-        {rand("plainAuthor") > 0.45 && <Author book={book} colour={withAlpha(gold, 0.5)} />}
+        {rand("plainAuthor") > 0.45 && <Author book={book} colour={withAlpha(gold, 0.5)} scale={scale} />}
       </span>
     );
   }
@@ -238,10 +249,10 @@ function SpineFace({ binding, book, gold, stamped, width, rand }: FaceProps) {
             className="pointer-events-none absolute inset-0"
             style={{ background: "linear-gradient(90deg, rgba(0,0,0,0.4), transparent 30%, rgba(0,0,0,0.35))" }}
           />
-          <Title book={book} colour={ink} narrow={narrow} />
+          <Title book={book} colour={ink} narrow={narrow} scale={scale} />
         </span>
         <span className="min-h-0 flex-[7]" />
-        {rand("labelAuthor") > 0.4 && <Author book={book} colour={withAlpha(gold, 0.45)} />}
+        {rand("labelAuthor") > 0.4 && <Author book={book} colour={withAlpha(gold, 0.45)} scale={scale} />}
       </span>
     );
   }
@@ -252,7 +263,7 @@ function SpineFace({ binding, book, gold, stamped, width, rand }: FaceProps) {
         <RuleGroup colour={stamped} count={2 + Math.round(rand("headRules"))} />
         <span className="flex min-h-0 flex-1 items-center justify-center overflow-hidden py-2">{title}</span>
         <RuleGroup colour={stamped} count={2} />
-        <Author book={book} colour={withAlpha(gold, 0.55)} />
+        <Author book={book} colour={withAlpha(gold, 0.55)} scale={scale} />
         <RuleGroup colour={withAlpha(gold, 0.3)} count={1} />
       </span>
     );
@@ -276,7 +287,7 @@ function SpineFace({ binding, book, gold, stamped, width, rand }: FaceProps) {
       </span>
       <Band gold={stamped} />
       <span className="flex min-h-0 flex-[3] items-center justify-center overflow-hidden">
-        <Author book={book} colour={withAlpha(gold, 0.62)} />
+        <Author book={book} colour={withAlpha(gold, 0.62)} scale={scale} />
       </span>
       {Array.from({ length: compartments }).map((_, index) => (
         <span key={index} className="contents">
@@ -294,8 +305,8 @@ function SpineFace({ binding, book, gold, stamped, width, rand }: FaceProps) {
 
 /* ------------------------------------------------------------------ */
 
-function Title({ book, colour, narrow }: { book: Book; colour: string; narrow: boolean }) {
-  const scale = narrow ? 0.9 : 1;
+function Title({ book, colour, narrow, scale }: { book: Book; colour: string; narrow: boolean; scale: number }) {
+  const shrink = (narrow ? 0.9 : 1) * scale;
   const length = book.title.length;
   const base = length <= 14 ? 0.86 : length <= 20 ? 0.78 : length <= 28 ? 0.68 : length <= 38 ? 0.6 : 0.53;
 
@@ -317,14 +328,14 @@ function Title({ book, colour, narrow }: { book: Book; colour: string; narrow: b
               WebkitBackgroundClip: "text",
               backgroundClip: "text",
               color: "transparent",
-              fontSize: `${(base * scale).toFixed(2)}rem`,
+              fontSize: `${(base * shrink).toFixed(2)}rem`,
               lineHeight: 1.12,
               maxWidth: "100%",
             }
           : {
               color: colour,
               textShadow: "0 1px 0 rgba(255,255,255,0.14)",
-              fontSize: `${(base * scale).toFixed(2)}rem`,
+              fontSize: `${(base * shrink).toFixed(2)}rem`,
               lineHeight: 1.12,
               maxWidth: "100%",
             }
@@ -335,7 +346,7 @@ function Title({ book, colour, narrow }: { book: Book; colour: string; narrow: b
   );
 }
 
-function Author({ book, colour }: { book: Book; colour: string }) {
+function Author({ book, colour, scale }: { book: Book; colour: string; scale: number }) {
   const stampedAuthor = surname(book.author);
 
   return (
@@ -344,7 +355,7 @@ function Author({ book, colour }: { book: Book; colour: string }) {
         className="vertical-text max-h-full overflow-hidden text-center font-display uppercase"
         style={{
           color: colour,
-          fontSize: stampedAuthor.length > 6 ? "0.46rem" : "0.54rem",
+          fontSize: `${((stampedAuthor.length > 6 ? 0.46 : 0.54) * scale).toFixed(2)}rem`,
           letterSpacing: "0.09em",
           lineHeight: 1.15,
         }}

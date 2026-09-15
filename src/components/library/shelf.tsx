@@ -14,13 +14,15 @@ interface ShelfProps {
   index: number;
   /** Usable width of the shelf, so a half-empty row can let its last book lean. */
   available: number;
+  /** Book scale, when the shelf is fitted to a bay measured on a photograph. */
+  scale?: number;
 }
 
 const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 
 /** One shelf: standing books on a stained board, with a brass numeral on the nose. */
-export function Shelf({ books, selectedId, onSelect, index, available }: ShelfProps) {
-  const used = books.reduce((total, book, i) => total + spineMetrics(book).width + (i ? 4 : 0), 0);
+export function Shelf({ books, selectedId, onSelect, index, available, scale = 1 }: ShelfProps) {
+  const used = books.reduce((total, book, i) => total + spineMetrics(book, scale).width + (i ? 1 : 0), 0);
   const slack = available - used;
 
   // A row with room to spare lets its last volume fall against the gap, the way
@@ -37,6 +39,7 @@ export function Shelf({ books, selectedId, onSelect, index, available }: ShelfPr
             onSelect={onSelect}
             isSelected={selectedId === book.id}
             lean={leanLast && i === books.length - 1 ? 7 : 0}
+            scale={scale}
           />
         ))}
 

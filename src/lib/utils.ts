@@ -44,7 +44,10 @@ export function noiseFrom(seed: string, salt: string): number {
   return hashUnit(`${seed}::${salt}`);
 }
 
-export function spineMetrics(book: Book): SpineMetrics {
+/** Tallest a book gets at scale 1 — a bay is fitted against this. */
+export const MAX_SPINE_HEIGHT = 318;
+
+export function spineMetrics(book: Book, scale = 1): SpineMetrics {
   const pages = clamp(book.pages ?? 300, MIN_PAGES, MAX_PAGES);
   const thickness = (pages - MIN_PAGES) / (MAX_PAGES - MIN_PAGES);
   const jitter = hashUnit(book.slug);
@@ -52,8 +55,8 @@ export function spineMetrics(book: Book): SpineMetrics {
   // Real shelves vary far more than page counts alone would suggest — trim
   // sizes differ, so the jitter carries as much weight as the extent does.
   return {
-    width: Math.round(36 + thickness * 54 + hashUnit(`${book.slug}:w`) * 10),
-    height: Math.round(214 + jitter * 74 + thickness * 30),
+    width: Math.round((36 + thickness * 54 + hashUnit(`${book.slug}:w`) * 10) * scale),
+    height: Math.round((214 + jitter * 74 + thickness * 30) * scale),
   };
 }
 
