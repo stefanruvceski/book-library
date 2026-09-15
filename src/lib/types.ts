@@ -95,3 +95,47 @@ export interface StoryblokStoriesResponse<T> {
 export interface StoryblokStoryResponse<T> {
   story: StoryblokStory<T>;
 }
+
+/* ------------------------------------------------------------------ *
+ * Photographic scene
+ * ------------------------------------------------------------------ */
+
+export interface SceneBay {
+  /** Left edge of the usable shelf, as a fraction of image width. */
+  left: number;
+  /** Right edge, as a fraction of image width. */
+  right: number;
+  /** The board's top surface — where the books stand — as a fraction of height. */
+  baseline: number;
+  /** Headroom above the board before the next shelf, as a fraction of height. */
+  clearance: number;
+  /**
+   * Paint the bay out before placing books in it. Leave this on unless the bay
+   * is genuinely empty in the photograph, or the photo's own books will show
+   * through the gaps.
+   */
+  dim?: boolean;
+}
+
+export interface Scene {
+  /** Public path of the backplate, e.g. `/scene/library.jpg`. */
+  image: string;
+  /** Intrinsic size, used for the aspect ratio. */
+  width: number;
+  height: number;
+  bays: SceneBay[];
+  /**
+   * Colour grade laid over the spines so they sit in the photograph's light
+   * rather than on top of it.
+   */
+  grade?: {
+    /** Hex tint multiplied over the books. */
+    tint?: string;
+    /** 0–1. */
+    strength?: number;
+    /** Extra darkening, 0–1. */
+    shade?: number;
+  };
+  /** Credit line shown under the case. Fill this in for stock photography. */
+  credit?: string;
+}

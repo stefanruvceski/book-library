@@ -158,7 +158,14 @@ export function OpenBook({ book, onClose, onPrev, onNext, position }: OpenBookPr
                   {book.title}
                 </h2>
                 <p className="mt-4 font-display text-lg italic text-ink/70">{book.author}</p>
-                <div className="mt-6 h-px w-16" style={{ backgroundColor: withAlpha(book.accentColor, 0.7) }} />
+                <div className="mt-6 flex items-center gap-2">
+                  <span className="h-px w-10" style={{ backgroundColor: withAlpha(book.accentColor, 0.7) }} />
+                  <span
+                    className="h-1.5 w-1.5 rotate-45"
+                    style={{ backgroundColor: withAlpha(book.accentColor, 0.8) }}
+                  />
+                  <span className="h-px w-10" style={{ backgroundColor: withAlpha(book.accentColor, 0.7) }} />
+                </div>
               </div>
 
               <dl className="space-y-3 text-sm text-ink/75">
@@ -366,6 +373,15 @@ function PageSheet({
       transition={{ duration: visible ? 0.45 : 0.16, delay: visible ? delay : 0 }}
     >
       {children}
+      {/* Foxing: old paper darkens and spots toward its edges */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(110% 85% at 50% 45%, transparent 55%, rgba(120,92,50,0.16) 88%, rgba(96,72,38,0.28) 100%)",
+        }}
+      />
       <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: gutterShade }} />
     </motion.div>
   );
