@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 
 import { WOOD_ALONG, WOOD_BACK, WOOD_UPRIGHT } from "@/lib/textures";
 
+import { PhotographicPass } from "./photographic";
+
 /**
  * The case the shelves sit in: planked back, stiles either side, a moulded
  * cornice and a plinth. Purely decorative, but it is what turns a row of books
@@ -67,6 +69,8 @@ export function Bookcase({ children }: { children: ReactNode }) {
           />
         </div>
       </div>
+
+      <PhotographicPass />
 
       {/* Plinth */}
       <div aria-hidden className="relative">

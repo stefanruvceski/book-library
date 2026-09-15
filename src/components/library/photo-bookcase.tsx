@@ -7,6 +7,7 @@ import type { Book, Scene } from "@/lib/types";
 import { MAX_SPINE_HEIGHT, packShelves, spineMetrics, withAlpha } from "@/lib/utils";
 
 import { BookSpine } from "./book-spine";
+import { PhotographicPass } from "./photographic";
 
 interface PhotoBookcaseProps {
   scene: Scene;
@@ -172,6 +173,9 @@ export function PhotoBookcase({ scene, books, selectedId, onSelect }: PhotoBookc
             style={{ backgroundColor: withAlpha(grade.tint, grade.strength ?? 0.18) }}
           />
         )}
+        {/* The drawn spines get the same grain as the photograph they sit in */}
+        <PhotographicPass />
+
         {grade?.shade ? (
           <div
             aria-hidden

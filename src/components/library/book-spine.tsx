@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 
-import { CLOTH_WEAVE, LEATHER_GRAIN, PAPER_FIBRE } from "@/lib/textures";
+import { CLOTH_WEAVE, LEATHER_GRAIN, PAPER_FIBRE, WOOD_UPRIGHT } from "@/lib/textures";
 import type { Book } from "@/lib/types";
 import { legibleStamp, luminance, noiseFrom, shade, spineMetrics, surname, withAlpha } from "@/lib/utils";
 
@@ -41,7 +41,24 @@ export function BookSpine({ book, onSelect, isSelected, lean = 0, scale = 1 }: B
   /** Gold rubs off with handling, but never so far that the title stops reading. */
   const gilding = 0.74 + rand("gilding") * 0.26;
   /** Even a packed shelf is never perfectly plumb. */
-  const microTilt = (rand("tilt") - 0.5) * 1.7;
+  const microTilt = (rand("tilt") - 0.5) * 2.4;
+
+  /*
+   * A book is not a rectangle. The cloth turns over the boards at the head and
+   * tail, the corners get bumped, and no two are cut alike — so the silhouette
+   * is rounded unevenly rather than with one radius.
+   */
+  const radius = [
+    `${(1 + rand("r1") * 1.8).toFixed(1)}px ${(1.5 + rand("r2") * 2).toFixed(1)}px`,
+    `${(1 + rand("r3") * 1.5).toFixed(1)}px ${(1 + rand("r4") * 1.5).toFixed(1)}px /`,
+    `${(2 + rand("r5") * 3).toFixed(1)}px ${(2.5 + rand("r6") * 3.5).toFixed(1)}px`,
+    `${(1.5 + rand("r7") * 2).toFixed(1)}px ${(1.5 + rand("r8") * 2).toFixed(1)}px`,
+  ].join(" ");
+
+  /** Boards are not planed flat and books do not all sit squarely on them. */
+  const seating = Math.round(rand("seating") * 3) - 1;
+  /** Nobody pushes every book to the same depth. */
+  const pushedIn = Math.round(rand("depth") * 4);
 
   const gold = legibleStamp(book.spineColor, book.accentColor);
   const stamped = withAlpha(gold, gilding);
@@ -58,8 +75,15 @@ export function BookSpine({ book, onSelect, isSelected, lean = 0, scale = 1 }: B
       layoutId={`book-${book.id}`}
       onClick={() => onSelect(book)}
       aria-label={`Open ${book.title} by ${book.author}`}
-      className="group relative shrink-0 cursor-pointer rounded-r-[3px] rounded-l-[2px] outline-none focus-visible:ring-2 focus-visible:ring-brass focus-visible:ring-offset-2 focus-visible:ring-offset-room"
-      style={{ width, height, transformStyle: "preserve-3d", transformOrigin: "bottom center" }}
+      className="group relative shrink-0 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-brass focus-visible:ring-offset-2 focus-visible:ring-offset-room"
+      style={{
+        width,
+        height,
+        marginBottom: seating,
+        borderRadius: radius,
+        transformStyle: "preserve-3d",
+        transformOrigin: "bottom center",
+      }}
       whileHover={reduceMotion ? undefined : { y: -14 }}
       whileFocus={reduceMotion ? undefined : { y: -14 }}
       whileTap={{ y: -6 }}
@@ -67,15 +91,21 @@ export function BookSpine({ book, onSelect, isSelected, lean = 0, scale = 1 }: B
     >
       {/* Inner element owns the tilt and lean so neither fights the shared-layout transform. */}
       <motion.span
-        className="absolute inset-0 block overflow-hidden rounded-r-[3px] rounded-l-[2px]"
+        className="absolute inset-0 block overflow-hidden"
         style={{
           backgroundColor: book.spineColor,
+          borderRadius: radius,
           transformOrigin: "bottom right",
           rotate: lean || microTilt,
-          boxShadow: `inset 1px 0 0 ${withAlpha("#000000", 0.55)}, inset -1px 0 0 ${withAlpha(
+          // Casting onto its neighbours is what turns a row of rectangles into
+          // books standing against each other.
+          boxShadow: `-6px 0 10px -4px ${withAlpha("#000000", 0.95)}, 6px 0 10px -4px ${withAlpha(
             "#000000",
-            0.55,
-          )}, inset 0 0 0 1px ${withAlpha("#000000", 0.35)}`,
+            0.92,
+          )}, inset 1px 0 0 ${withAlpha("#000000", 0.5)}, inset -1px 0 0 ${withAlpha(
+            "#000000",
+            0.5,
+          )}`,
         }}
         initial={false}
         whileHover={reduceMotion ? undefined : { rotateY: -24, z: 26 }}
@@ -87,9 +117,20 @@ export function BookSpine({ book, onSelect, isSelected, lean = 0, scale = 1 }: B
           className="pointer-events-none absolute inset-0"
           style={{
             backgroundImage: cloth ? CLOTH_WEAVE : LEATHER_GRAIN,
-            backgroundSize: cloth ? "56px 56px" : "76px 76px",
+            backgroundSize: cloth ? "34px 34px" : "46px 46px",
             mixBlendMode: "soft-light",
-            opacity: cloth ? 0.75 : 0.6,
+            opacity: cloth ? 1 : 0.9,
+          }}
+        />
+
+        {/* Dust, fading and handling all streak vertically down a standing book */}
+        <span
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage: WOOD_UPRIGHT,
+            backgroundSize: `${Math.round(width * 1.6)}px ${Math.round(height * 1.3)}px`,
+            mixBlendMode: "multiply",
+            opacity: 0.3 + rand("streak") * 0.22,
           }}
         />
 
@@ -97,12 +138,15 @@ export function BookSpine({ book, onSelect, isSelected, lean = 0, scale = 1 }: B
         <span
           className="pointer-events-none absolute inset-0"
           style={{
-            backgroundImage: `radial-gradient(140% 45% at ${18 + rand("blotch") * 50}% ${
-              10 + rand("blotchY") * 70
-            }%, ${withAlpha("#ffffff", 0.07)}, transparent 70%),
-               radial-gradient(120% 40% at ${70 - rand("blotch2") * 40}% ${
-                 30 + rand("blotch2Y") * 60
-               }%, ${withAlpha("#000000", 0.26)}, transparent 72%)`,
+            backgroundImage: `radial-gradient(150% 34% at ${18 + rand("blotch") * 50}% ${
+              8 + rand("blotchY") * 40
+            }%, ${withAlpha("#ffffff", 0.13)}, transparent 72%),
+               radial-gradient(130% 30% at ${70 - rand("blotch2") * 40}% ${
+                 30 + rand("blotch2Y") * 55
+               }%, ${withAlpha("#000000", 0.34)}, transparent 74%),
+               radial-gradient(90% 26% at ${25 + rand("blotch3") * 55}% ${
+                 55 + rand("blotch3Y") * 40
+               }%, ${withAlpha("#000000", 0.22)}, transparent 70%)`,
           }}
         />
 
@@ -111,8 +155,8 @@ export function BookSpine({ book, onSelect, isSelected, lean = 0, scale = 1 }: B
           className="pointer-events-none absolute inset-0"
           style={{
             background: cloth
-              ? "linear-gradient(90deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.3) 9%, rgba(0,0,0,0.02) 30%, rgba(255,255,255,0.06) 52%, rgba(0,0,0,0.16) 78%, rgba(0,0,0,0.5) 93%, rgba(0,0,0,0.85) 100%)"
-              : "linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.28) 8%, rgba(255,255,255,0.04) 26%, rgba(255,255,255,0.17) 46%, rgba(0,0,0,0.06) 68%, rgba(0,0,0,0.42) 90%, rgba(0,0,0,0.88) 100%)",
+              ? "linear-gradient(90deg, rgba(0,0,0,0.66) 0%, rgba(0,0,0,0.2) 13%, rgba(255,255,255,0.035) 44%, rgba(0,0,0,0.14) 74%, rgba(0,0,0,0.62) 100%)"
+              : "linear-gradient(90deg, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.18) 12%, rgba(255,255,255,0.085) 42%, rgba(255,255,255,0.03) 58%, rgba(0,0,0,0.16) 76%, rgba(0,0,0,0.66) 100%)",
           }}
         />
 
@@ -122,6 +166,47 @@ export function BookSpine({ book, onSelect, isSelected, lean = 0, scale = 1 }: B
           style={{
             background:
               "linear-gradient(180deg, rgba(255,246,225,0.1) 0%, rgba(255,246,225,0.03) 22%, transparent 45%, rgba(0,0,0,0.3) 82%, rgba(0,0,0,0.52) 100%)",
+          }}
+        />
+
+        {/* The head of a spine is domed where the cloth turns over the boards */}
+        <span
+          className="pointer-events-none absolute inset-x-0 top-0 h-5"
+          style={{
+            background: `radial-gradient(120% 150% at 50% 100%, transparent 58%, ${withAlpha(
+              "#000000",
+              0.75,
+            )} 100%)`,
+          }}
+        />
+
+        {/* Dust along the top edge — the surest sign a shelf is real */}
+        <span
+          className="pointer-events-none absolute inset-x-[2px] top-0"
+          style={{
+            height: 1 + Math.round(rand("dust") * 1.6),
+            background: `linear-gradient(90deg, transparent, ${withAlpha(
+              "#d8ccb2",
+              0.16 + rand("dustAmt") * 0.3,
+            )} 28%, ${withAlpha("#d8ccb2", 0.1 + rand("dustAmt") * 0.24)} 72%, transparent)`,
+          }}
+        />
+
+        {/* Bumped corners: the two places every old book is worn */}
+        <span
+          className="pointer-events-none absolute top-0 left-0"
+          style={{
+            width: 7 + rand("bumpA") * 7,
+            height: 7 + rand("bumpA") * 9,
+            background: `radial-gradient(120% 120% at 0% 0%, ${withAlpha("#c9b795", 0.1)}, transparent 72%)`,
+          }}
+        />
+        <span
+          className="pointer-events-none absolute right-0 bottom-0"
+          style={{
+            width: 6 + rand("bumpB") * 8,
+            height: 6 + rand("bumpB") * 8,
+            background: `radial-gradient(120% 120% at 100% 100%, ${withAlpha("#c9b795", 0.08)}, transparent 70%)`,
           }}
         />
 
@@ -155,12 +240,25 @@ export function BookSpine({ book, onSelect, isSelected, lean = 0, scale = 1 }: B
         <span
           className="pointer-events-none absolute inset-y-[2px] right-0 rounded-r-[3px]"
           style={{
-            width: 3 + Math.round(rand("edge") * 2),
-            backgroundImage: `repeating-linear-gradient(0deg, rgba(0,0,0,0.26) 0 1px, transparent 1px 2px),
-               linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.4)),
-               linear-gradient(90deg, rgba(0,0,0,0.6), #b3a281 48%, #7d6d4c)`,
+            width: 2 + Math.round(rand("edge") * 2),
+            right: pushedIn,
+            opacity: 0.5 + rand("edgeLit") * 0.35,
+            backgroundImage: `repeating-linear-gradient(0deg, rgba(0,0,0,0.3) 0 1px, transparent 1px 2px),
+               linear-gradient(180deg, rgba(0,0,0,0.3), rgba(0,0,0,0.6)),
+               linear-gradient(90deg, rgba(0,0,0,0.7), #6f6247 55%, #443b29)`,
           }}
         />
+
+        {/* A book pushed in sits in its neighbours' shadow */}
+        {pushedIn > 0 && (
+          <span
+            className="pointer-events-none absolute inset-y-0 right-0"
+            style={{
+              width: pushedIn,
+              background: `linear-gradient(90deg, transparent, ${withAlpha("#000000", 0.8)})`,
+            }}
+          />
+        )}
 
         {/* Sitting further back in the case just means less light reaches it */}
         {recess > 0.02 && (
@@ -228,10 +326,10 @@ function SpineFace({ binding, book, gold, stamped, width, scale, rand }: FacePro
           className="relative flex min-h-0 flex-[4] items-center justify-center overflow-hidden rounded-[1px]"
           style={{
             backgroundColor: face,
-            boxShadow: `0 1px 2px ${withAlpha("#000000", 0.55)}, inset 0 0 0 1px ${withAlpha(
+            boxShadow: `0 1px 3px ${withAlpha("#000000", 0.6)}, inset 0 0 0 1px ${withAlpha(
               morocco ? gold : "#6d5a34",
-              morocco ? 0.42 : 0.3,
-            )}`,
+              morocco ? 0.28 : 0.2,
+            )}, inset 0 0 8px ${withAlpha("#000000", 0.35)}`,
           }}
         >
           <span
@@ -307,6 +405,10 @@ function SpineFace({ binding, book, gold, stamped, width, scale, rand }: FacePro
 
 function Title({ book, colour, narrow, scale }: { book: Book; colour: string; narrow: boolean; scale: number }) {
   const shrink = (narrow ? 0.9 : 1) * scale;
+  // A binder strikes type by hand. Perfectly centred, perfectly square
+  // lettering is the single most synthetic thing on a drawn spine.
+  const skew = (noiseFrom(book.slug, "stampSkew") - 0.5) * 1.1;
+  const drift = (noiseFrom(book.slug, "stampDrift") - 0.5) * 5;
   const length = book.title.length;
   const base = length <= 14 ? 0.86 : length <= 20 ? 0.78 : length <= 28 ? 0.68 : length <= 38 ? 0.6 : 0.53;
 
@@ -317,8 +419,13 @@ function Title({ book, colour, narrow, scale }: { book: Book; colour: string; na
   return (
     <span
       className="vertical-text max-h-full overflow-hidden px-px py-1 text-center font-display font-semibold tracking-[0.02em]"
-      style={
-        metallic
+      style={{
+        rotate: `${skew.toFixed(2)}deg`,
+        translate: `0 ${drift.toFixed(1)}px`,
+        fontSize: `${(base * shrink).toFixed(2)}rem`,
+        lineHeight: 1.12,
+        maxWidth: "100%",
+        ...(metallic
           ? {
               backgroundImage: `linear-gradient(90deg, transparent 12%, ${withAlpha(
                 "#ffffff",
@@ -328,18 +435,14 @@ function Title({ book, colour, narrow, scale }: { book: Book; colour: string; na
               WebkitBackgroundClip: "text",
               backgroundClip: "text",
               color: "transparent",
-              fontSize: `${(base * shrink).toFixed(2)}rem`,
-              lineHeight: 1.12,
-              maxWidth: "100%",
             }
           : {
               color: colour,
-              textShadow: "0 1px 0 rgba(255,255,255,0.14)",
-              fontSize: `${(base * shrink).toFixed(2)}rem`,
-              lineHeight: 1.12,
-              maxWidth: "100%",
-            }
-      }
+              // Blind tooling is pressed into the cloth, so it is caught by the
+              // light on one side and shadowed on the other.
+              textShadow: "0 1px 0 rgba(255,255,255,0.16), 0 -1px 0 rgba(0,0,0,0.45)",
+            }),
+      }}
     >
       {book.title}
     </span>
